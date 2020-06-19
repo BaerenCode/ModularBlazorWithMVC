@@ -1,0 +1,29 @@
+﻿@using System.Reflection;
+@using System.IO;
+
+@{
+    var modulList = new List<string>()
+    {
+        "ModularBlazorWithMVC.Components"
+    };
+
+    string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+    var files = Directory.GetFiles(path, "*.dll");
+    List<Assembly> allAssemblies = new List<Assembly>();
+
+    foreach (string modulDll in files.Where(x => modulList.Any(p => Path.GetFileName(x).StartsWith(p))))
+    {
+        allAssemblies.Add(Assembly.LoadFile(modulDll));
+    }
+}
+
+<Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="allAssemblies.ToArray()">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p>Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+</Router>
